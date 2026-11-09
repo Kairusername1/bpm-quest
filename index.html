@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BPM Quest</title>
+<style>
+:root{--bg:#efe6cf;--fg:#241c14;--card:#fff9e8;--bd:#241c14;--ok:#2e7d32;--bad:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17132a;--fg:#f0e8d4;--card:#251f3d;--bd:#f0e8d4;--ok:#3f9b48;--bad:#d24a4a}}
+:root[data-theme="dark"]{--bg:#17132a;--fg:#f0e8d4;--card:#251f3d;--bd:#f0e8d4;--ok:#3f9b48;--bad:#d24a4a}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--bg) repeating-conic-gradient(rgba(128,128,128,.07) 0 25%,transparent 0 50%) 0 0/24px 24px;color:var(--fg);font:15px/1.4 "Courier New",ui-monospace,monospace}
+#app{max-width:560px;height:100%;margin:0 auto;padding:8px 10px;box-sizing:border-box;display:flex;flex-direction:column}#ui{flex:1;min-height:0;overflow-y:auto;padding:0 2px 6px}
+canvas{width:min(100%,calc(34dvh*16/9));height:auto;aspect-ratio:16/9;flex:none;margin:0 auto;display:block;image-rendering:pixelated;border:3px solid var(--bd);background:#000}
+h1,h2{margin:12px 0 4px;font-size:1.5rem}h2{font-size:1.2rem}
+.b{display:block;width:100%;margin:8px 0;padding:10px 12px;text-align:left;font:inherit;font-weight:bold;color:var(--fg);background:var(--card);border:3px solid var(--bd);box-shadow:3px 3px 0 var(--bd);cursor:pointer}
+.b:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bd)}
+.b:disabled{opacity:.6;cursor:default}.b.ok{background:var(--ok);color:#fff}.b.bad{background:var(--bad);color:#fff}
+small{display:block;font-weight:normal;opacity:.8}
+input{width:100%;box-sizing:border-box;margin:8px 0;padding:10px;font:inherit;color:var(--fg);background:var(--card);border:3px solid var(--bd)}
+.bar{position:relative;height:24px;border:3px solid var(--bd);background:var(--card);margin-top:8px}
+.hp{height:100%;background:#d32f2f;transition:width .5s}
+.bar span{position:absolute;left:6px;top:0;line-height:24px;font-size:.85rem;font-weight:bold;color:#fff;text-shadow:1px 1px 0 #000}
+.st{font-size:.85rem;margin:4px 0}
+.q{font-size:1.05rem;font-weight:bold;margin:10px 0}
+.slot{padding:4px 8px;margin:4px 0;border:2px dashed var(--bd);font-size:.9rem}.slot.on{border-style:solid;background:var(--card)}
+.boss{color:var(--bad);font-weight:bold;margin:10px 0 0}
+#msg{min-height:1.5em;margin:6px 0}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+@keyframes wob{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pulse{50%{transform:scale(1.04)}}
+@keyframes shk{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(4px,-2px)}}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes drop{0%{transform:translate(-50%,-80px)}12%,80%{transform:translate(-50%,0)}100%{transform:translate(-50%,-80px)}}
+.b,.q,.slot.on{animation:pop .3s backwards}
+.b.bad{animation:wob .35s}.b.ok{animation:pulse .4s}
+.shk{animation:shk .35s}h1{animation:bob 1.6s ease-in-out infinite}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;transform:translateX(-50%);background:#ffd23f;color:#241c14;border:3px solid #241c14;padding:8px 16px;font-weight:bold;z-index:9;animation:drop 2.2s both}
+canvas{touch-action:manipulation;-webkit-user-select:none;user-select:none}.b{font-size:.92rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}.grid .b{margin:4px 0}
+h2{font-size:1.05rem;margin:6px 0 2px}.q{font-size:.95rem;margin:6px 0}.st{font-size:.78rem;margin:2px 0}.bar{height:20px;margin-top:4px}.bar span{line-height:20px;font-size:.75rem}
+input{padding:8px;margin:4px 0}small{font-size:.75rem}.slot{padding:2px 8px;margin:3px 0;font-size:.82rem}#msg{margin:4px 0}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background-color:var(--s1);background-image:var(--l4),var(--l3),var(--l2),var(--l1),linear-gradient(var(--s1),var(--s2));background-repeat:repeat-x,repeat-x,repeat-x,repeat-x,no-repeat;background-position:0 100%,0 100%,0 100%,0 6%,0 0;background-size:320px 80px,480px 90px,480px 120px,480px 60px,100% 100%;image-rendering:pixelated;animation:para 60s linear infinite}
+@keyframes para{to{background-position:-2560px 100%,-1440px 100%,-480px 100%,-960px 6%,0 0}}
+#ui{margin-top:8px;padding:4px 8px 6px;background:color-mix(in srgb,var(--bg) 88%,transparent);border:3px solid var(--bd)}
+@media(prefers-reduced-motion:reduce){body::before{animation:none!important}*{animation:none!important;transition:none!important}}
+@media(hover:hover){.b:not(:disabled):hover{background:#ffd23f;color:#241c14;box-shadow:5px 5px 0 var(--bd);transform:translate(-1px,-1px)}}
+.b:not(:disabled):active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bd)}
+#cr{position:fixed;left:0;top:0;z-index:-1;pointer-events:none;white-space:nowrap;font:bold 14px "Courier New",monospace;color:#ffd23f;text-shadow:2px 2px 0 rgba(0,0,0,.65);will-change:transform}
+</style></head><body>
+<div id="app"><canvas id="cv" width="320" height="180"></canvas><div id="ui"></div></div>
+<script>
+const D=[
+{id:'bpm',n:'BPM Caverns',s:'BPM',c:'#43a047',sp:0,bn:'Digital Dragon',bp:'Business process management enables digital transformation. Name all 5 ways!',
+q:[['What process integrates and leverages digital technology to change how a business operates and align with strategic goals?',['Digital transformation']],
+['A form of outsourcing that relocates business processes or functions to a different country is known as what?',['Offshoring']],
+['Handing over business processes or functions to another company or independent contractor is classified as what?',['Outsourcing']],
+['What structured approach plays a crucial role in enabling and supporting digital transformation initiatives?',['Business process management','BPM']],
+['BPM analyzes, redesigns and improves existing processes before new digital technology is introduced. Which way of enabling digital transformation is this?',['Process Optimization','Process Optimisation']]],
+b:[[['Process Optimization','optimi'],'Analyze, redesign and improve processes before adding digital tech.'],
+[['Change Management','change'],'Manages the human and organizational side: communication, roles, training.'],
+[['Technology Integration','integrat'],'End-to-end visibility shows where automation and AI help most.'],
+[['Data Standardization','standardi'],'Standard processes improve data quality and integration.'],
+[['Risk Reduction','risk'],'A clear view of processes helps mitigate risk.']]},
+{id:'bpr',n:'BPR Bastion',s:'BPR',c:'#1e88e5',sp:0,bn:'Reengineer Rex',bp:'Name the 6 core principles of Business Process Reengineering!',
+q:[['What management practice involves a fundamental rethinking and radical redesign of core business processes to achieve dramatic performance improvements?',['Business process reengineering','BPR']],
+['Which aspect of BPR changes processes from the ground up to achieve substantial, not incremental, improvements?',['Radical Redesign']],
+['Which aspect of BPR makes an organization rethink “how work should be done” instead of making small improvements?',['Fundamental Rethinking']],
+['Core BPR principle: focus on ____, not tasks.',['Outcomes'],['Inputs','Costs','Tools']],
+['Core BPR principle: link ____ activities instead of merging their results later.',['Parallel'],['Sequential','Manual','Remote']]],
+b:[[['Focus on outcomes','outcome'],'Organize around results, not tasks.'],
+[['Empower employees','empower'],'Let the people doing the work make decisions.'],
+[['Technology as an enabler','tech'],'Use technology to make the new design possible.'],
+[['Capture information once at the source','capture','once'],'Record data one time, where it is created.'],
+[['Link parallel activities','parallel'],'Coordinate parallel work during the process.'],
+[['Dispersed resources as centralized','dispers','centraliz'],'Treat spread-out resources as if they were central.']]},
+{id:'risk',n:'Risk Ruins',s:'RISK',c:'#e53935',sp:2,bn:'Lord of Uncertainty',bp:'Name the 4 risk treatment strategies!',
+q:[['Which risk category covers malfunctions of technology infrastructure, such as software crashes, power outages and network failures?',['Technology failures']],
+['These risks involve violating laws, regulations or internal policies, resulting in penalties or lawsuits.',['Compliance risks']],
+['Which risks can impact an organization’s overall strategy and long-term objectives, such as major technological shifts or competitive pressure?',['Strategic risks']],
+['Simple employee mistakes that cause data-entry errors, wrong orders or skipped procedures are called what?',['Human error']],
+['Which risks involve negative public perception caused by poor customer service, negative publicity or ethical issues?',['Reputational risks']],
+['Which risks arise from day-to-day operations, such as equipment failure, supply chain disruptions or ineffective processes?',['Operational risks']]],
+b:[[['Risk Avoidance','avoid'],'Choose not to move forward with the risk.'],
+[['Risk Mitigation','mitigat'],'Action plan that reduces risk to acceptable levels.'],
+[['Risk Transfer','transfer'],'Shift the risk to a third party or an insurer.'],
+[['Risk Acceptance','accept'],'Accept risks within the tolerance threshold.']]},
+{id:'cq',n:'Culture Crypt',s:'CQ',c:'#8e24aa',sp:1,bn:'Babel Beast',bp:'Name the 5 key strategies for managing cross-cultural business processes!',
+q:[['What is described as the ability to work effectively across cultures?',['Cultural Intelligence','CQ']],
+['Key cross-cultural strategy: design ____ processes.',['Culturally sensitive','Sensitive'],['Fully automated','Identical','Offshored']],
+['Key cross-cultural strategy: adapt ____ and leadership styles.',['Management'],['Financial','Technical','Marketing']],
+['Key cross-cultural strategy: build and maintain ____.',['Trust'],['Margins','Backups','Contracts']],
+['Relocating business processes to a different country is called what?',['Offshoring']]],
+b:[[['Foster cultural intelligence','cultural intelligence','cq'],'Build the ability to work effectively across cultures.'],
+[['Establish clear communication protocols','communicat'],'Agree on how, when and in what language people communicate.'],
+[['Adapt management and leadership styles','adapt','leadership'],'Fit your style to the culture of the team.'],
+[['Design culturally sensitive processes','sensitive'],'Build processes that respect cultural differences.'],
+[['Build and maintain trust','trust'],'Trust keeps distributed teams working together.']]},
+{id:'erp',n:'ERP Fortress',s:'ERP',c:'#fb8c00',sp:0,bn:'Data Silo Golem',bp:'Name the 6 functions and benefits of ERP!',
+q:[['What software platform integrates and automates core processes such as finance, manufacturing, supply chain and HR into a single system with a shared database?',['Enterprise Resource Planning','ERP']],
+['Which ERP benefit unifies business functions into one seamless system, eliminating data silos?',['Integration']],
+['Which ERP benefit gives a single source of truth with accurate, up-to-date information across departments?',['Real-Time Data']],
+['Which ERP benefit centralizes data for comprehensive visibility, from financial reporting to inventory?',['Enhanced Visibility']]],
+b:[[['Integration','integrat'],'Unifies functions and removes data silos.'],
+[['Real-Time Data','real'],'A single source of truth, consistent across departments.'],
+[['Automation','automat'],'Automates manual work and reduces errors.'],
+[['Enhanced Visibility','visib'],'Centralized data shows the whole business.'],
+[['Improved Efficiency','efficien'],'Streamlined workflows save time and money.'],
+[['Data-Driven Insights','insight','datadriven'],'Analytics reveal trends and support decisions.']]}];
+
+const X=[40,100,160,220,280],Y=[88,76,92,76,88];
+const $=id=>document.getElementById(id),ui=$('ui'),cv=$('cv'),cx=cv.getContext('2d');cx.imageSmoothingEnabled=false;
+const sh=a=>[...a].sort(()=>Math.random()-.5);
+const PAL={e:'#111',w:'#fff',h:'#6b3a1e',f:'#f2c48d',b:'#3b6fd4',l:'#333',y:'#ffd23f'};
+const SP={hero:['..hhhh..','.hhhhhh.','.feffef.','.ffffff.','.bbbbbb.','bfbbbbfb','.bb..bb.','.ll..ll.'],
+0:['........','..cccc..','.cccccc.','cwecwecc','cccccccc','cccccccc','.cccccc.','........'],
+1:['c......c','cc.cc.cc','cccccccc','cwecwecc','.cccccc.','..c..c..','........','........'],
+2:['.wwwwww.','wwwwwwww','weewweew','weewweew','wwwwwwww','.wwwwww.','.w.ww.w.','........'],
+boss:['y.y.y.y.','yyyyyyy.','cccccccc','ceecceec','ceecceec','cccccccc','c.cccc.c','........']};
+function spr(k,x,y,s,col){SP[k].forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch=='.')return;cx.fillStyle=PAL[ch]||col;cx.fillRect(x+i*s,y+j*s,s,s)}))}
+function hubDraw(){skyArt();for(let y=3;y<12;y++)for(let x=0;x<20;x++){cx.fillStyle=['#5a9e4b','#63a653','#559746'][(x*7+y*13)%3];cx.fillRect(x*16,y*16,16,16)}
+cx.fillStyle='#c9a66b';cx.fillRect(0,104,320,18);cx.textAlign='center';cx.font='bold 9px monospace';
+D.forEach((d,i)=>{const x=X[i],y=Y[i];cx.fillStyle=d.c;cx.fillRect(x-18,y-14,36,28);cx.fillStyle='#111';cx.fillRect(x-5,y+2,10,12);cx.fillStyle='#fff';cx.fillText(d.s,x,y-18);if(S.clear[d.id]){cx.fillStyle='#ffd23f';cx.fillText('★',x,y-28)}});[[8,140],[304,138],[78,146],[258,150]].forEach(([x,y])=>{cx.fillStyle='#5d4037';cx.fillRect(x,y,4,10);cx.fillStyle='#2e7d32';cx.fillRect(x-6,y-12,16,14);cx.fillRect(x-3,y-18,10,8)});spr('hero',148,118+Math.round(Math.sin(T/10)*2),3);cx.fillStyle='rgba(255,255,255,.7)';[0,1,2].forEach(i=>{const p=(T/6+i*120)%380-30;cx.fillRect(p,10+i*14,30,8);cx.fillRect(p+6,6+i*14,18,6)})}
+function hubArt(){SC={t:'hub'}}
+function btl(d,boss,flash){const keep=!flash&&F&&F.keep;if(keep)F.keep=0;SC={t:'b',d,boss,born:flash?SC.born:T,dead:flash?SC.dead:0,gems:(flash||keep)?SC.gems:[0,0,0].map(()=>({x:20+Math.random()*280,y:20+Math.random()*100}))};if(!flash)walkUntil=T+45;if(flash){flashT=10;lunge=36;fl.push({x:boss?240:248,y:70,s:'Hit!',c:'#ffd23f',l:40});if(!boss)SC.dead=T+10}}
+
+let S={mode:'easy',hp:60,xp:0,lvl:1,coins:0,potions:1,clear:{},started:0},F=null,V='',rs=0;
+try{const t=localStorage.getItem('bpmquest');if(t)S={...S,...JSON.parse(t)}}catch(e){}
+S.id=S.id||Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(16).padStart(2,'0')).join('');
+const save=()=>{try{localStorage.setItem('bpmquest',JSON.stringify(S))}catch(e){}};
+const mx=()=>50+10*S.lvl,need=()=>30+20*S.lvl,dmg=()=>S.mode==='easy'?10:15;
+const bar=()=>`<div class="bar"><div class="hp" style="width:${Math.max(0,S.hp/mx()*100)}%"></div><span>HP ${Math.max(0,S.hp)}/${mx()}</span></div><div class="st">Level ${S.lvl}, XP ${S.xp}/${need()}, ${S.coins} coins, ${S.potions} potion${S.potions==1?'':'s'}, ${S.mode==='easy'?'easy':'hard'} mode</div>`;
+const upd=()=>{const h=document.querySelector('#bw .hp');if(!h)return($('bw').innerHTML=bar());const t=document.createElement('div');t.innerHTML=bar();h.style.width=t.querySelector('.hp').style.width;document.querySelector('#bw .bar span').textContent=t.querySelector('span').textContent;document.querySelector('#bw .st').textContent=t.querySelector('.st').textContent};
+function gain(x,c){S.xp+=x;S.coins+=c;let m='';while(S.xp>=need()){S.xp-=need();S.lvl++;S.hp=mx();m=' Level up! HP restored.';toast('LEVEL UP! Level '+S.lvl);sfx(523,.1);setTimeout(()=>sfx(784,.2),120)}return m}
+const nz=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+function lev(a,b){const m=[...Array(a.length+1)].map((_,i)=>[i,...Array(b.length).fill(0)]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+function ok(inp,alts,loose){const i=nz(inp);if(!i)return false;return alts.some(a=>{const n=nz(a);return i===n||(n.length>4&&lev(i,n)<=(n.length>9?2:1))||(loose&&n.length>=4&&i.length>=4&&i.includes(n))})}
+
+function title(){V='';hubArt();ui.innerHTML=`<h1>BPM Quest</h1><p>Slay monsters with your reviewer. Pick a mode to begin.</p><button class="b" onclick="go('easy')">Easy mode<small>Multiple choice</small></button><button class="b" onclick="go('hard')">Hard mode<small>Type the answer (identification)</small></button>${S.started?'<button class="b" onclick="hub()">Continue saved game<small>Level '+S.lvl+', '+Object.keys(S.clear).length+'/5 dungeons cleared</small></button>':''}`}
+function go(m){S.mode=m;S.started=1;save();hub()}
+function hub(){V='hub';F=null;rs=0;hubArt();
+ui.innerHTML=`<h2>Town</h2><div id="bw">${bar()}</div><p>Choose a dungeon, or tap a building on the map.</p>`+D.map((d,i)=>`<button class="b" onclick="enter(${i})">${d.n}<small>${S.clear[d.id]?'Cleared ★ (replay anytime)':d.q.length+' monsters and a boss'}</small></button>`).join('')+
+`<button class="b" onclick="buy()">Buy a potion, 15 coins<small>Heals 30 HP in a fight</small></button><button class="b" onclick="board()">Leaderboard<small>Put your name on the class ranking</small></button><label class="b">${S.img?'Change ambush picture':'Upload a picture for ambushes'}<small>Your own image becomes the enemy you smash</small><input type="file" accept="image/*" hidden onchange="loadPic(this)"></label>${S.img?'<button class="b" onclick="S.img=\'\';save();hub()">Remove my picture</button>':''}<button class="b" onclick="F={d:D[0],qu:[],boss:0,test:1};ambush()">Try an ambush<small>Practice the tap game</small></button><button class="b" onclick="snd()">Sound: ${S.mute?'off':'on'}</button><button class="b" onclick="swap()">Switch to ${S.mode==='easy'?'hard':'easy'} mode</button><button class="b" id="rst" onclick="reset()">Erase progress</button>`}
+function buy(){if(S.coins>=15){S.coins-=15;S.potions++;save();hub()}else $('bw').innerHTML=bar()+'<p>Not enough coins. Defeat more monsters.</p>'}
+function swap(){S.mode=S.mode==='easy'?'hard':'easy';save();hub()}
+function reset(){if(!rs){rs=1;$('rst').textContent='Tap again to erase everything';return}
+S={mode:S.mode,mute:S.mute,id:S.id,name:S.name,hp:60,xp:0,lvl:1,coins:0,potions:1,clear:{},started:1};save();hub()}
+cv.onpointermove=e=>pt(e);cv.onclick=e=>{if(V==='smash')return tap();if(V==='fight')return gem(e);if(V!=='hub')return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*320/r.width,y=(e.clientY-r.top)*180/r.height;
+const i=X.findIndex((px,k)=>Math.abs(x-px)<22&&Math.abs(y-Y[k])<30);if(i>=0)enter(i)};
+
+const hdr=()=>`<h2>${F.d.n}</h2><div id="bw">${bar()}</div>`;
+const potBtn='<button class="b" style="width:auto;display:inline-block" onclick="potion()">Use potion (+30 HP)</button><button class="b" style="width:auto;display:inline-block;margin-left:6px" onclick="flee()">Run away</button>';
+function potion(){if(S.hp>0&&S.potions>0&&S.hp<mx()){S.potions--;S.hp=Math.min(mx(),S.hp+30);save();upd()}}
+function enter(i){F={d:D[i],qu:sh(D[i].q.map((_,k)=>k)),boss:0};toast('Flashlight: find hidden coins!');mon()}
+function mon(){V='fight';const d=F.d,q=d.q[F.qu[0]],a0=q[1][0];btl(d,0);let a;
+if(S.mode==='easy'){const pool=sh([...new Set(D.flatMap(x=>x.q.map(y=>y[1][0])))].filter(t=>t!==a0));
+a='<div class="grid">'+sh([a0,...(q[2]||pool.slice(0,3))]).map(c=>`<button class="b c" data-c="${c===a0?1:0}" onclick="pick(this)">${c}</button>`).join('')+'</div>'}
+else a='<input id="in" autocomplete="off" autocapitalize="off" placeholder="Type your answer" onkeydown="if(event.key===\'Enter\')this.nextElementSibling.click()"><button class="b" onclick="typed()">Attack!</button>';
+ui.innerHTML=`${hdr()}<p class="st">Monsters left: ${F.qu.length}</p><p class="q">${q[0]}</p>${a}<div id="msg"></div>${potBtn}`;if($('in'))$('in').focus()}
+function pick(btn){document.querySelectorAll('.c').forEach(b=>{b.disabled=true;if(b.dataset.c==='1')b.classList.add('ok')});if(btn.dataset.c!=='1')btn.classList.add('bad');res(btn.dataset.c==='1')}
+function typed(){const i=$('in');if(!i.value.trim())return;const g=ok(i.value,F.d.q[F.qu[0]][1]);i.disabled=true;i.nextElementSibling.disabled=true;res(g)}
+function res(g){const q=F.d.q[F.qu[0]];if(g){const m=gain(10,5);F.qu.shift();btl(F.d,0,1);sfx(660,.1);setTimeout(()=>sfx(880,.15),90);$('msg').innerHTML='Hit! +10 XP, +5 coins.'+m;upd();save();setTimeout(Math.random()<.3?ambush:mon,1000)}
+else{S.hp-=dmg();hurtFx(dmg());F.keep=1;F.qu.push(F.qu.shift());upd();save();if(S.hp<=0)return setTimeout(defeat,900);
+$('msg').innerHTML=`The monster hits you for ${dmg()}. Answer: <b>${q[1][0]}</b><button class="b" onclick="mon()">Next monster</button>`}}
+function boss(){V='fight';F.boss=1;F.f=new Set;const d=F.d;btl(d,1);let a;
+if(S.mode==='easy'){const names=new Set(d.b.map(i=>i[0][0]));const pool=sh(D.filter(x=>x!==d).flatMap(x=>x.b.map(i=>i[0][0])).filter(t=>!names.has(t))).slice(0,4);
+a='<div class="grid">'+sh([...names,...pool]).map(c=>`<button class="b c" onclick="chip(this)">${c}</button>`).join('')+'</div>'}
+else a='<input id="in" autocomplete="off" autocapitalize="off" placeholder="Type one item, then attack" onkeydown="if(event.key===\'Enter\')this.nextElementSibling.click()"><button class="b" onclick="bossTyped()">Attack!</button>';
+ui.innerHTML=`${hdr()}<p class="boss">Boss: ${d.bn}</p><p class="q">${d.bp}</p><div id="sl"></div>${a}<div id="msg"></div>${potBtn}`;slots()}
+function slots(){$('sl').innerHTML=F.d.b.map((it,k)=>`<div class="slot ${F.f.has(k)?'on':''}">${k+1}. ${F.f.has(k)?'<b>'+it[0][0]+'</b>: '+it[1]:'???'}</div>`).join('')}
+function chip(btn){btn.disabled=true;const k=F.d.b.findIndex(it=>it[0][0]===btn.textContent);if(k>=0){btn.classList.add('ok');hitB(k)}else{btn.classList.add('bad');missB()}}
+function bossTyped(){const i=$('in'),v=i.value;i.value='';i.focus();if(!v.trim())return;const b=F.d.b;
+const k=b.findIndex((it,j)=>!F.f.has(j)&&ok(v,it[0],1));if(k>=0)return hitB(k);
+if(b.some((it,j)=>F.f.has(j)&&ok(v,it[0],1)))$('msg').textContent='You already found that one.';else missB()}
+function hitB(k){if(S.hp<=0)return;F.f.add(k);const m=gain(10,5);btl(F.d,1,1);sfx(660,.1);setTimeout(()=>sfx(880,.15),90);slots();upd();save();
+$('msg').innerHTML='Critical hit! +10 XP, +5 coins.'+m;if(F.f.size===F.d.b.length)setTimeout(win,900)}
+function missB(){if(S.hp<=0||F.f.size===F.d.b.length)return;S.hp-=12;hurtFx(12);upd();save();if(S.hp<=0)return setTimeout(defeat,700);$('msg').textContent='The boss hits you for 12. Not part of the list.'}
+function win(){if(!F)return;const d=F.d;SC={t:'win'};cf=Array.from({length:70},()=>({x:160,y:60,vx:(Math.random()-.5)*6,vy:-Math.random()*5-1,c:['#ffd23f','#e53935','#43a047','#1e88e5','#fb8c00'][Math.random()*5|0]}));[523,659,784,1047].forEach((f,i)=>setTimeout(()=>sfx(f,.18),i*110));const first=!S.clear[d.id];S.clear[d.id]=1;const m=first?gain(50,30):'';save();if(S.name)submit();V='';const all=Object.keys(S.clear).length===5;
+ui.innerHTML=`<h2>${d.n} cleared!</h2><p>${first?'+50 XP, +30 coins.':'Replay: no clear bonus.'}${m}</p>${all?'<p><b>All 5 dungeons cleared. You’re ready for the exam!</b></p>':''}${S.name?'':'<button class="b" onclick="board()">Add my name to the leaderboard</button>'}<button class="b" onclick="hub()">Back to town</button>`}
+function defeat(){V='';F=null;SC={t:'hub'};[300,220,150].forEach((f,i)=>setTimeout(()=>sfx(f,.25,'sawtooth'),i*150));S.hp=Math.ceil(mx()/2);S.coins>>=1;save();
+ui.innerHTML=`<h2>You fainted</h2><p>You wake up in town with half your HP and half your coins. Review the answers and try again.</p><button class="b" onclick="hub()">Back to town</button>`}
+let SC={t:'hub'},walkUntil=0,sx=0,T=0,fl=[],cf=[],lunge=0,flashT=0,hurt=0;
+function sfx(f,t=.12,ty='square'){if(S.mute)return;try{const A=sfx.a||(sfx.a=new AudioContext()),o=A.createOscillator(),g=A.createGain();o.type=ty;o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(A.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,A.currentTime+t);o.stop(A.currentTime+t)}catch(e){}}
+function snd(){S.mute=!S.mute;save();hub()}
+(function(){const dk=matchMedia('(prefers-color-scheme:dark)').matches,P=dk?{s1:'#0d0b24',s2:'#3a2a63',c:'#6a5a9e',m:'#2c2457',h:'#241d49',t:'#171235',g:'#120e2a'}:{s1:'#6ec6ff',s2:'#e8f6ff',c:'#ffffff',m:'#9fb4d6',h:'#6fae5a',t:'#2f6b3a',g:'#4b8f3d'};
+const L=(w,h,fn)=>{let r='';fn((x,y,a,b,c)=>r+=`<rect x="${x}" y="${y}" width="${a}" height="${b}" fill="${c}"/>`);return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" shape-rendering="crispEdges">${r}</svg>`)}")`};
+const st=document.documentElement.style,set=(k,v)=>st.setProperty(k,v);set('--s1',P.s1);set('--s2',P.s2);
+set('--l1',L(480,60,R=>{[[30,14,64],[150,30,48],[300,8,80],[400,34,56]].forEach(([x,y,w])=>{R(x,y+8,w,8,P.c);R(x+8,y,w-24,8,P.c);R(x+16,y+16,w-32,4,P.c)})}));
+set('--l2',L(480,120,R=>{for(let x=0;x<480;x+=8){const h=24+(15-Math.abs((x/8)%30-15))*5;R(x,120-h,8,h,P.m)}}));
+set('--l3',L(480,90,R=>{for(let x=0;x<480;x+=8){const h=26+Math.round(Math.sin(x/480*Math.PI*4)*3)*4;R(x,90-h,8,h,P.h)}}));
+set('--l4',L(320,80,R=>{R(0,64,320,16,P.g);[20,90,150,230,280].forEach((x,i)=>{const t=i%2?24:36;R(x+6,56,4,8,'#5d4037');R(x,56-t,16,t,P.t);R(x+4,48-t,8,8,P.t)})}));})();
+function flee(){if(!F||SC.t!=='b'||S.hp<=0)return;SC.fleeT=T;walkUntil=T+60;F=null;V='';document.querySelectorAll('#ui button,#ui input').forEach(b=>b.disabled=true);sfx(520,.08);setTimeout(()=>sfx(380,.12),90);toast('You ran away!');setTimeout(hub,1000)}
+const PIC=new Image();let lx=160,ly=90,litT=-999;
+function setPic(){if(S.img)PIC.src=S.img}setPic();
+function pt(e){const r=cv.getBoundingClientRect();lx=(e.clientX-r.left)*320/r.width;ly=(e.clientY-r.top)*180/r.height;litT=T;return[lx,ly]}
+function dark(){if(T-litT>240){lx=160+Math.sin(T/45)*110;ly=85+Math.cos(T/33)*35}const g=cx.createRadialGradient(lx,ly,8,lx,ly,75);g.addColorStop(0,'rgba(0,0,12,0)');g.addColorStop(.5,'rgba(0,0,12,.05)');g.addColorStop(1,'rgba(0,0,12,.68)');cx.fillStyle=g;cx.fillRect(0,0,320,180);cx.fillStyle='rgba(255,230,150,.07)';cx.beginPath();cx.arc(lx,ly,34,0,7);cx.fill()}
+function loadPic(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=96;const k=Math.max(96/im.width,96/im.height),w=im.width*k,h=im.height*k;c.getContext('2d').drawImage(im,(96-w)/2,(96-h)/2,w,h);S.img=c.toDataURL('image/jpeg',.85);save();setPic();hub()};im.onerror=()=>toast('Could not read that image');im.src=r.result};r.readAsDataURL(f)}
+function gem(e){const[x,y]=pt(e),g=SC.gems&&SC.gems.find(g=>!g.got&&Math.hypot(g.x-x,g.y-y)<14);if(g){g.got=1;S.coins++;save();upd();sfx(1000,.08);fl.push({x:g.x,y:g.y,s:'+1 coin',c:'#ffd23f',l:35})}}
+const after=()=>F&&F.test?hub():mon();
+function ambush(){if(!F)return;V='smash';const n=S.mode==='easy'?12:16;SC={t:'smash',d:F.d,n:0,need:n,end:T+300,res:0};ui.innerHTML=`<h2>Surprise ambush!</h2><div id="bw">${bar()}</div><p class="q">Tap the ${S.img?'picture':'monster'} ${n} times in 5 seconds!</p><div id="msg">Each hit shows a term to remember.</div>`;sfx(200,.3,'sawtooth');toast('AMBUSH!')}
+function tap(){if(SC.t!=='smash'||SC.res)return;SC.n++;flashT=5;sfx(300+SC.n*25,.06);const it=F.d.b[SC.n%F.d.b.length];$('msg').innerHTML=`<b>${it[0][0]}</b>: ${it[1]}`;fl.push({x:160+(Math.random()-.5)*80,y:70,s:'+'+SC.n,c:'#ffd23f',l:30});
+if(SC.n>=SC.need){SC.res=1;gain(15,10);toast('Smashed! +15 XP, +10 coins');upd();save();[523,659,784].forEach((f,i)=>setTimeout(()=>sfx(f,.12),i*90));setTimeout(after,1000)}}
+function smashDraw(){const d=SC.d;bg(d);const s=flashT>0?11:12,y0=Math.round(Math.sin(T/6)*3);
+if(S.img&&PIC.naturalWidth){const z=flashT>0?88:96;cx.drawImage(PIC,160-z/2,36+(96-z)/2+y0,z,z)}else spr(d.sp,160-4*s,130-8*s+y0,s,flashT>0?'#fff':d.c);
+if(flashT>0)flashT--;dark();const left=Math.max(0,(SC.end-T)/300);cx.fillStyle='#000';cx.fillRect(20,6,280,10);cx.fillStyle=left<.3?'#e53935':'#43a047';cx.fillRect(22,8,276*left,6);
+cx.fillStyle='#ffd23f';cx.textAlign='center';cx.font='bold 14px monospace';cx.fillText('SMASH! '+SC.n+'/'+SC.need,160,32);
+if(!SC.res&&T>SC.end){SC.res=2;S.hp-=8;hurtFx(8);upd();save();if(S.hp<=0)setTimeout(defeat,700);else{$('msg').textContent='Too slow! The monster got away.';setTimeout(after,1200)}}}
+SP.hero2=['..hhhh..','.hhhhhh.','.feffef.','.ffffff.','.bbbbbb.','bfbbbbfb','..bbbb..','..llll..'];
+function skyArt(){const g=cx.createLinearGradient(0,0,0,48);g.addColorStop(0,'#6ec6ff');g.addColorStop(1,'#cdeeff');cx.fillStyle=g;cx.fillRect(0,0,320,48);cx.fillStyle='#7a8fb5';[[20,30],[90,22],[170,34],[250,24],[310,28]].forEach(([x,h])=>{for(let r=0;r<h;r++)cx.fillRect(x-r,48-h+r,2*r,1)});cx.fillStyle='#ffe082';cx.fillRect(268,8,14,14);cx.globalAlpha=.25;cx.fillRect(262,2,26,26);cx.globalAlpha=1;cx.fillStyle='#37474f';for(let i=0;i<3;i++){const bx=(T/3+i*90)%360-20,by=14+i*8+Math.sin(T/6+i)*3;cx.fillRect(bx,by,3,1);cx.fillRect(bx+3,by+1,2,1);cx.fillRect(bx+5,by,3,1)}}
+function bg(d){if(T<walkUntil)sx+=3;cx.fillStyle='#1b1530';cx.fillRect(0,0,320,180);cx.globalAlpha=.16;cx.fillStyle=d.c;cx.fillRect(0,0,320,130);cx.globalAlpha=1;cx.fillStyle='rgba(255,255,255,.07)';
+for(let r=0;r<9;r++){const y=r*16;cx.fillRect(0,y,320,1);for(let x=-32;x<352;x+=32)cx.fillRect(x-(sx%32)+(r%2)*16,y,1,16)}
+cx.fillStyle='#2b2140';cx.fillRect(0,130,320,50);cx.fillStyle='rgba(255,255,255,.08)';for(let x=-24;x<344;x+=24)cx.fillRect(x-(sx%24),130,2,50);cx.fillRect(0,130,320,2);
+for(let k=0;k<4;k++){const x=((k*110-sx)%440+440)%440-60;if(x<-10||x>330)continue;cx.fillStyle='#ffa726';cx.globalAlpha=.12;cx.fillRect(x-14,38,32,34);cx.globalAlpha=1;cx.fillStyle='#6d4c41';cx.fillRect(x,54,4,16);const f=3+Math.abs(Math.sin(T/3+k))*4;cx.fillStyle='#ffca28';cx.fillRect(x-1,54-f*1.6,6,f*1.6);cx.fillStyle='#ff7043';cx.fillRect(x+1,54-f,2,f)}
+for(let i=-1;i<12;i++){const x=i*32-(sx*.5%32)+((i*7)%5)*3,h=10+((i*13)%4)*6;cx.fillStyle='#0e0a1c';for(let r=0;r<h;r++)cx.fillRect(x+r*8/h,r,16-r*16/h,1)}
+for(let k=0;k<6;k++){const x=((k*70-sx*1.5)%420+420)%420-40;cx.globalAlpha=.14;cx.fillStyle=d.c;cx.fillRect(x-8,106,28,24);cx.globalAlpha=.95;cx.fillRect(x,122,4,8);cx.fillRect(x+4,116,4,14);cx.fillRect(x+8,124,4,6);cx.globalAlpha=1}
+for(let i=0;i<18;i++){cx.fillStyle='rgba(255,255,255,.35)';cx.fillRect((i*53+T*(.2+i%3*.1))%330-5,(i*37+Math.sin(T/40+i)*10+130)%130,2,2)}}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function hurtFx(n){hurt=16;fl.push({x:50,y:80,s:'-'+n,c:'#ff5252',l:45});sfx(150,.25,'sawtooth');const a=$('app');a.classList.remove('shk');void a.offsetWidth;a.classList.add('shk')}
+function btlDraw(){const{d,boss}=SC;bg(d);
+for(let i=0;i<14;i++){cx.fillStyle='rgba(255,210,63,'+(.3+.6*Math.abs(Math.sin(T/30+i)))+')';cx.fillRect((i*47)%320,(i*29)%70+8,3,3)}
+lunge*=.85;
+const hb=Math.round(Math.sin(T/12)*2),hs=hurt>0?(Math.random()-.5)*6:0;spr(T<walkUntil&&(T>>2)%2?'hero2':'hero',30+Math.round(lunge+hs)+(SC.fleeT?Math.min(340,(T-SC.fleeT)*10):0),82+(T<walkUntil?Math.round(Math.abs(Math.sin(T/3))*3):hb),6);
+let sc=1;if(SC.dead)sc=Math.max(0,Math.min(sc,1-(T-SC.dead)/18));
+const s=Math.round((boss?10:7)*sc),bx=(boss?240:248)+Math.pow(Math.max(0,1-(T-SC.born)/40),2)*130,by=130-8*s+Math.sin(T/10)*(boss?4:3)*sc,sk=flashT>0?(Math.random()-.5)*8:0;
+if(s>0)spr(boss?'boss':d.sp,Math.round(bx-4*s+sk),Math.round(by),s,flashT>0?'#fff':d.c);
+dark();SC.gems.forEach(g=>{if(!g.got&&Math.hypot(g.x-lx,g.y-ly)<60){const gy=g.y+Math.sin(T/8+g.x)*2;cx.fillStyle='#ffd23f';cx.fillRect(g.x-3,gy-3,7,7);cx.fillStyle='#fff';cx.fillRect(g.x-2,gy-2,2,2)}});if(flashT>0)flashT--;if(hurt>0){cx.fillStyle='rgba(255,0,0,'+hurt/32+')';cx.fillRect(0,0,320,180);hurt--}}
+function winDraw(){cx.fillStyle='#1b1530';cx.fillRect(0,0,320,180);cx.fillStyle='#3a2f4f';cx.fillRect(0,130,320,50);spr('hero',136,82-Math.round(Math.abs(Math.sin(T/6))*24),6);cf.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;cx.fillStyle=p.c;cx.fillRect(p.x,p.y,4,4)});cx.fillStyle='#ffd23f';cx.textAlign='center';cx.font='bold 16px monospace';cx.fillText('VICTORY!',160,30+Math.sin(T/8)*3)}
+let lt=0,ac=0;function loop(n){requestAnimationFrame(loop);ac+=Math.min(100,n-(lt||n));lt=n;if(ac<16.6)return;ac-=16.6;T++;cv.style.cursor=SC.t==='hub'?'pointer':'none';({hub:hubDraw,b:btlDraw,win:winDraw,smash:smashDraw})[SC.t]();cx.textAlign='center';cx.font='bold 14px monospace';fl=fl.filter(f=>f.l>0);fl.forEach(f=>{f.y-=.8;f.l--;cx.globalAlpha=Math.min(1,f.l/15);cx.fillStyle='#000';cx.fillText(f.s,f.x+1,f.y+1);cx.fillStyle=f.c;cx.fillText(f.s,f.x,f.y)});cx.globalAlpha=1}
+requestAnimationFrame(loop);
+const _mon=mon;mon=function(){if(!F)return;F.qu.length?_mon():boss()};
+const API='/api/leaderboard',esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const tot=()=>{let t=S.xp;for(let l=1;l<S.lvl;l++)t+=30+20*l;return t},score=()=>tot()+Object.keys(S.clear).length*100;
+async function submit(){if(!S.name)return 0;try{return(await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:S.id,name:S.name,score:score(),lvl:S.lvl,clear:Object.keys(S.clear).length,mode:S.mode})})).ok}catch(e){return 0}}
+async function lb(){try{const r=await fetch(API+'?id='+S.id,{cache:'no-store'});if(!r.ok)throw 0;const a=await r.json();if(!$('lb'))return;$('lb').innerHTML=a.length?a.map((x,i)=>`<div class="slot${x.you?' on':''}">${i+1}. ${esc(x.name)}${x.you?' (you)':''}: <b>${esc(x.score)}</b> pts, Lv ${esc(x.lvl)}, ${esc(x.clear)}/5 ★, ${esc(x.mode)}</div>`).join(''):'No scores yet. Be the first!'}catch(e){if($('lb'))$('lb').textContent='Leaderboard is offline. It works once the game is deployed on Netlify.'}}
+function board(){V='';ui.innerHTML=`<h2>Leaderboard</h2><p class="st">Your score: <b>${score()}</b> (total XP + 100 per dungeon cleared)</p><input id="nm" maxlength="16" placeholder="Your name" value="${esc(S.name||'')}" onkeydown="if(event.key==='Enter')join()"><button class="b" onclick="join()">Submit my score</button><div id="lb">Loading...</div><button class="b" onclick="hub()">Back to town</button>`;lb()}
+async function join(){const n=$('nm').value.replace(/[<>]/g,'').trim().slice(0,16);if(!n){$('lb').textContent='Type your name first.';return}S.name=n;save();$('lb').textContent='Sending...';if(!await submit()){$('lb').textContent='Could not send your score. Check your connection.';return}lb()}
+(function(){const e=document.createElement('div');e.id='cr';e.textContent='BSIS-33 | credited by: Kyle Gersava';document.body.appendChild(e);
+let x=40,y=80,vx=48,vy=36,l=0,k=0;const C=['#ffd23f','#ff7043','#66bb6a','#42a5f5','#ce93d8'];e.style.transform='translate(40px,80px)';
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+function f(n){requestAnimationFrame(f);const dt=Math.min(.05,(n-(l||n))/1000);l=n;const w=innerWidth-e.offsetWidth,h=innerHeight-e.offsetHeight;x+=vx*dt;y+=vy*dt;let b=0;
+if(x<0){x=0;vx=Math.abs(vx);b=1}if(x>w){x=Math.max(0,w);vx=-Math.abs(vx);b=1}if(y<0){y=0;vy=Math.abs(vy);b=1}if(y>h){y=Math.max(0,h);vy=-Math.abs(vy);b=1}
+if(b)e.style.color=C[++k%C.length];e.style.transform=`translate(${x}px,${y}px)`}
+requestAnimationFrame(f)})();
+title();
+</script></body></html>
